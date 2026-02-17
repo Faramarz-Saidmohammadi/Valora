@@ -5,7 +5,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { logout } from '../slices/authSlice';
 import SearchBox from './SearchBox';
-import logo from '../assets/logo.png';
 import { resetCart } from '../slices/cartSlice';
 import CartDrawer from './CartDrawer';
 
@@ -39,7 +38,6 @@ const Header = () => {
       <div className='app-container'>
         <div className='flex h-20 items-center justify-between gap-3'>
           <Link to='/' className='flex items-center gap-3 text-lg font-semibold tracking-[-0.01em] text-ink'>
-            <img src={logo} alt='Valora' className='h-9 w-9 rounded-lg object-cover' />
             <span>Valora</span>
           </Link>
           <button
