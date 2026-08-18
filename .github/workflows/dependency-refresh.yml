@@ -24,8 +24,10 @@ jobs:
       - name: Refresh root lockfile
         run: npm install --package-lock-only
 
-      - name: Refresh frontend lockfile
-        run: npm install --prefix frontend --package-lock-only
+      - name: Rebuild frontend lockfile
+        run: |
+          rm -f frontend/package-lock.json
+          npm install --prefix frontend --package-lock-only
 
       - name: Commit refreshed lockfiles
         run: |
