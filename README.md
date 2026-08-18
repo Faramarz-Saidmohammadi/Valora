@@ -20,6 +20,8 @@ The frontend and backend are developed together from this repository. In product
 - product image uploads require administrator access
 - uploaded images are limited to JPEG, PNG, and WebP files with a 5 MB maximum size
 - request bodies have explicit size limits
+- public login and registration endpoints have targeted rate limits
+- baseline HTTP security headers are applied without imposing a CSP that would interfere with the current PayPal integration
 - passwords are hashed before persistence
 
 ## Local development
@@ -33,7 +35,7 @@ The frontend and backend are developed together from this repository. In product
 ### Setup
 
 ```bash
-npm install
+npm ci
 npm ci --prefix frontend
 cp .env.example .env
 npm run dev
@@ -72,6 +74,7 @@ Frontend commands can also be run directly:
 npm run dev --prefix frontend
 npm run build --prefix frontend
 npm run preview --prefix frontend
+npm run test:e2e --prefix frontend
 ```
 
 ## Quality checks
@@ -85,6 +88,7 @@ Pull requests run automated checks for:
 - clean frontend dependency installation
 - Vite production build
 - frontend production dependency audit
+- Chromium browser regression tests for catalog filtering, product navigation, cart behavior, and responsive navigation
 
 ## Package management
 
