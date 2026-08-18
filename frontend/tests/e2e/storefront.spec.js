@@ -62,7 +62,7 @@ test('catalog filtering and cart flow remain functional', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Add to cart' }).click();
   await expect(page).toHaveURL(/\/cart$/);
-  await expect(page.getByText('Atlas Backpack')).toBeVisible();
+  await expect(page.getByRole('main').getByRole('link', { name: 'Atlas Backpack' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Open cart with 1 items/i })).toBeVisible();
 });
 
