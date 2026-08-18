@@ -11,11 +11,15 @@ import {
   updateUser,
 } from '../controllers/userController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
+import {
+  authLimiter,
+  registrationLimiter,
+} from '../middleware/rateLimitMiddleware.js';
 
 const router = express.Router();
 
-router.route('/').post(registerUser).get(protect, admin, getUsers);
-router.post('/auth', authUser);
+router.route('/').post(registrationLimiter, registerUser).get(protect, admin, getUsers);
+router.post('/auth', authLimiter, authUser);
 router.post('/logout', logoutUser);
 router
   .route('/profile')

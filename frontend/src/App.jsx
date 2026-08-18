@@ -14,9 +14,9 @@ const App = () => {
   useEffect(() => {
     const expirationTime = localStorage.getItem('expirationTime');
     if (expirationTime) {
-      const currentTime = new Date().getTime();
+      const currentTime = Date.now();
 
-      if (currentTime > expirationTime) {
+      if (currentTime > Number(expirationTime)) {
         dispatch(logout());
       }
     }

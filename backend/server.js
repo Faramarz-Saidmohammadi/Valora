@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 dotenv.config();
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
@@ -16,8 +17,15 @@ connectDB();
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.disable('x-powered-by');
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
 app.use('/api/products', productRoutes);
@@ -29,19 +37,19 @@ app.get('/api/config/paypal', (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
 
+const __dirname = path.resolve();
+
 if (process.env.NODE_ENV === 'production') {
-  const __dirname = path.resolve();
   app.use('/uploads', express.static('/var/data/uploads'));
-  app.use(express.static(path.join(__dirname, '/frontend/build')));
+  app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
   app.get('*', (req, res) =>
-    res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
+    res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'))
   );
 } else {
-  const __dirname = path.resolve();
-  app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   app.get('/', (req, res) => {
-    res.send('API is running....');
+    res.send('API is running');
   });
 }
 
@@ -49,5 +57,5 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(port, () =>
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`)
 );
