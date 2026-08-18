@@ -30,15 +30,16 @@ const products = [
 ];
 
 async function mockCatalog(page) {
-  await page.route('**/api/products/product-1', async (route) => {
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(products[0]) });
-  });
-
   await page.route('**/api/products**', async (route) => {
+    const { pathname } = new URL(route.request().url());
+    const body = pathname === '/api/products/product-1'
+      ? products[0]
+      : { products, page: 1, pages: 1 };
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ products, page: 1, pages: 1 }),
+      body: JSON.stringify(body),
     });
   });
 }
