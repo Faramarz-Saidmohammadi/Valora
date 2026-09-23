@@ -1,8 +1,7 @@
-import { FaTimes } from 'react-icons/fa';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import { useGetOrdersQuery } from '../../slices/ordersApiSlice';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const OrderListScreen = () => {
   const { data: orders, isLoading, error } = useGetOrdersQuery();
@@ -53,13 +52,13 @@ const OrderListScreen = () => {
                     <td>{order.createdAt.substring(0, 10)}</td>
                     <td>${order.totalPrice}</td>
                     <td>
-                      {order.isPaid ? order.paidAt.substring(0, 10) : <FaTimes className='text-red-500' />}
+                      {order.isPaid ? order.paidAt.substring(0, 10) : 'No'}
                     </td>
                     <td>
                       {order.isDelivered ? (
                         order.deliveredAt.substring(0, 10)
                       ) : (
-                        <FaTimes className='text-red-500' />
+                        'No'
                       )}
                     </td>
                     <td>

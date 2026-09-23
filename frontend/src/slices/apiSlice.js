@@ -2,6 +2,7 @@ import { fetchBaseQuery, createApi } from '@reduxjs/toolkit/query/react';
 import { BASE_URL } from '../constants';
 
 import { logout } from './authSlice'; // Import the logout action
+import { resetCart } from './cartSlice';
 
 // NOTE: code here has changed to handle when our JWT and Cookie expire.
 // We need to customize the baseQuery to be able to intercept any 401 responses
@@ -17,6 +18,7 @@ async function baseQueryWithAuth(args, api, extra) {
   // Dispatch the logout action on 401.
   if (result.error && result.error.status === 401) {
     api.dispatch(logout());
+    api.dispatch(resetCart());
   }
   return result;
 }

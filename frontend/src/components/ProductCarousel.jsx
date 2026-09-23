@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import Message from './Message';
 import { useGetTopProductsQuery } from '../slices/productsApiSlice';
 
@@ -46,6 +46,8 @@ const ProductCarousel = () => {
               key={product._id}
               type='button'
               onClick={() => setActive(idx)}
+              aria-label={`Show ${product.name}`}
+              aria-pressed={idx === active}
               className={`h-2.5 w-8 rounded-full ${idx === active ? 'bg-brand-500' : 'bg-white/50'}`}
             ></button>
           ))}

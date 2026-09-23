@@ -1,7 +1,52 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Link } from 'react-router';
 import { FaTimes } from 'react-icons/fa';
 
 const CartDrawer = ({ open, onClose, cartItems }) => {
+  const closeButtonRef = useRef(null);
+  const drawerRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const previouslyFocused = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = drawerRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+      );
+      if (!focusableElements?.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    closeButtonRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [onClose, open]);
+
   const itemCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
   const subtotal = cartItems
     .reduce((acc, item) => acc + item.qty * item.price, 0)
@@ -10,16 +55,28 @@ const CartDrawer = ({ open, onClose, cartItems }) => {
   return (
     <>
       <div
+        aria-hidden='true'
         className={`fixed inset-0 z-40 bg-slate-900/30 transition-opacity duration-200 ${open ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
         onClick={onClose}
       ></div>
       <aside
-        className={`glass-panel fixed right-0 top-0 z-50 h-full w-full max-w-md transform overflow-y-auto p-4 sm:p-5 transition duration-200 ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        ref={drawerRef}
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby='cart-drawer-title'
+        aria-hidden={!open}
+        className={`glass-panel fixed right-0 top-0 z-50 h-full w-full max-w-md transform overflow-y-auto p-4 sm:p-5 transition duration-200 ${open ? 'visible translate-x-0' : 'invisible translate-x-full'}`}
       >
         <div className='mb-5 flex items-center justify-between border-b border-slate-200 pb-4'>
-          <h2 className='text-lg font-semibold tracking-[-0.01em] text-ink'>Your Cart</h2>
-          <button type='button' onClick={onClose} className='app-btn-secondary !p-2'>
-            <FaTimes />
+          <h2 id='cart-drawer-title' className='text-lg font-semibold tracking-[-0.01em] text-ink'>Your Cart</h2>
+          <button
+            ref={closeButtonRef}
+            type='button'
+            onClick={onClose}
+            className='app-btn-secondary !p-2'
+            aria-label='Close cart'
+          >
+            <FaTimes aria-hidden='true' />
           </button>
         </div>
 

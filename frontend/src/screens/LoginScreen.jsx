@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
@@ -7,6 +7,7 @@ import FormContainer from '../components/FormContainer';
 import { useLoginMutation } from '../slices/usersApiSlice';
 import { setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
+import { getSafeRedirect } from '../utils/safeRedirect.mjs';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,7 @@ const LoginScreen = () => {
 
   const { search } = useLocation();
   const sp = new URLSearchParams(search);
-  const redirect = sp.get('redirect') || '/';
+  const redirect = getSafeRedirect(sp.get('redirect'));
 
   useEffect(() => {
     if (userInfo) {
@@ -55,6 +56,8 @@ const LoginScreen = () => {
               type='email'
               placeholder='Enter email'
               value={email}
+              required
+              autoComplete='email'
               onChange={(e) => setEmail(e.target.value)}
               className='app-input'
             />
@@ -68,6 +71,8 @@ const LoginScreen = () => {
               type='password'
               placeholder='Enter password'
               value={password}
+              required
+              autoComplete='current-password'
               onChange={(e) => setPassword(e.target.value)}
               className='app-input'
             />
@@ -79,7 +84,7 @@ const LoginScreen = () => {
         </form>
         <p className='mt-5 text-sm text-slate-600'>
           New Customer?{' '}
-          <Link to={redirect ? `/register?redirect=${redirect}` : '/register'}>Register</Link>
+          <Link to={`/register?redirect=${encodeURIComponent(redirect)}`}>Register</Link>
         </p>
       </div>
     </FormContainer>

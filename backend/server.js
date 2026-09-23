@@ -13,8 +13,6 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 const port = process.env.PORT || 5000;
 
-connectDB();
-
 const app = express();
 
 app.disable('x-powered-by');
@@ -56,6 +54,18 @@ if (process.env.NODE_ENV === 'production') {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, () =>
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`)
-);
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(port, () =>
+      console.log(
+        `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`
+      )
+    );
+  } catch (error) {
+    console.error(`Database connection failed: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();

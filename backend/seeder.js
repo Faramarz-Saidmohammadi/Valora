@@ -10,8 +10,6 @@ import connectDB from './config/db.js';
 
 dotenv.config();
 
-connectDB();
-
 const importData = async () => {
   try {
     await Order.deleteMany();
@@ -50,8 +48,19 @@ const destroyData = async () => {
   }
 };
 
-if (process.argv[2] === '-d') {
-  destroyData();
-} else {
-  importData();
-}
+const run = async () => {
+  try {
+    await connectDB();
+
+    if (process.argv[2] === '-d') {
+      await destroyData();
+    } else {
+      await importData();
+    }
+  } catch (error) {
+    console.error(`${error}`.red.inverse);
+    process.exit(1);
+  }
+};
+
+run();

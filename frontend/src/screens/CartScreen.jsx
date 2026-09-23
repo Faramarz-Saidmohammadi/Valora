@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaTrash } from 'react-icons/fa';
 import Message from '../components/Message';
@@ -64,8 +64,9 @@ const CartScreen = () => {
                     type='button'
                     className='app-btn-danger'
                     onClick={() => removeFromCartHandler(item._id)}
+                    aria-label={`Remove ${item.name} from cart`}
                   >
-                    <FaTrash />
+                    <FaTrash aria-hidden='true' />
                   </button>
                 </div>
               </article>

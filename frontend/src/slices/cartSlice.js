@@ -1,13 +1,36 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { updateCart } from '../utils/cartUtils';
 
-const initialState = localStorage.getItem('cart')
-  ? JSON.parse(localStorage.getItem('cart'))
-  : { cartItems: [], shippingAddress: {}, paymentMethod: 'PayPal' };
+const createEmptyCart = () => ({
+  cartItems: [],
+  shippingAddress: {},
+  paymentMethod: 'PayPal',
+});
+
+const loadCart = () => {
+  try {
+    const storedCart = localStorage.getItem('cart');
+    if (!storedCart) return createEmptyCart();
+
+    const parsedCart = JSON.parse(storedCart);
+    if (!parsedCart || !Array.isArray(parsedCart.cartItems)) {
+      throw new Error('Invalid stored cart');
+    }
+
+    return {
+      ...createEmptyCart(),
+      ...parsedCart,
+      shippingAddress: parsedCart.shippingAddress || {},
+    };
+  } catch {
+    localStorage.removeItem('cart');
+    return createEmptyCart();
+  }
+};
 
 const cartSlice = createSlice({
   name: 'cart',
-  initialState,
+  initialState: loadCart(),
   reducers: {
     addToCart: (state, action) => {
       // NOTE: we don't need user, rating, numReviews or reviews
@@ -38,13 +61,16 @@ const cartSlice = createSlice({
       state.paymentMethod = action.payload;
       localStorage.setItem('cart', JSON.stringify(state));
     },
-    clearCartItems: (state, action) => {
+    clearCartItems: (state) => {
       state.cartItems = [];
       localStorage.setItem('cart', JSON.stringify(state));
     },
     // NOTE: here we need to reset state for when a user logs out so the next
     // user doesn't inherit the previous users cart and shipping
-    resetCart: (state) => (state = initialState),
+    resetCart: () => {
+      localStorage.removeItem('cart');
+      return createEmptyCart();
+    },
   },
 });
 

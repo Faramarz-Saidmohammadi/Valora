@@ -1,20 +1,27 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { hashModifiedPassword } from '../utils/password.js';
 
 const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 80,
     },
     email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
+      maxlength: 254,
     },
     password: {
       type: String,
       required: true,
+      minlength: 8,
     },
     isAdmin: {
       type: Boolean,
@@ -33,13 +40,8 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 // Encrypt password using bcrypt
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    next();
-  }
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+userSchema.pre('save', async function () {
+  await hashModifiedPassword(this);
 });
 
 const User = mongoose.model('User', userSchema);

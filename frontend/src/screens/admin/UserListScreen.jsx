@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import {
@@ -7,7 +7,7 @@ import {
   useGetUsersQuery,
 } from '../../slices/usersApiSlice';
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const UserListScreen = () => {
   const { data: users, refetch, isLoading, error } = useGetUsersQuery();
@@ -17,8 +17,8 @@ const UserListScreen = () => {
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure')) {
       try {
-        await deleteUser(id);
-        refetch();
+        await deleteUser(id).unwrap();
+        await refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -52,14 +52,17 @@ const UserListScreen = () => {
                     <Link
                       to={`/admin/user/${user._id}/edit`}
                       className='app-btn-secondary !px-3 !py-1.5 text-xs'
+                      aria-label={`Edit ${user.name}`}
                     >
-                      <FaEdit />
+                      <FaEdit aria-hidden='true' />
                     </Link>
                     <button
+                      type='button'
                       className='app-btn-danger !px-3 !py-1.5 text-xs'
                       onClick={() => deleteHandler(user._id)}
+                      aria-label={`Delete ${user.name}`}
                     >
-                      <FaTrash />
+                      <FaTrash aria-hidden='true' />
                     </button>
                   </div>
                 )}
@@ -85,21 +88,26 @@ const UserListScreen = () => {
                     <td>
                       <a className='break-all' href={`mailto:${user.email}`}>{user.email}</a>
                     </td>
-                    <td>{user.isAdmin ? <FaCheck className='text-emerald-600' /> : <FaTimes className='text-red-500' />}</td>
+                    <td className={user.isAdmin ? 'text-emerald-700' : 'text-slate-600'}>
+                      {user.isAdmin ? 'Yes' : 'No'}
+                    </td>
                     <td>
                       {!user.isAdmin && (
                         <div className='flex gap-2'>
                           <Link
                             to={`/admin/user/${user._id}/edit`}
                             className='app-btn-secondary !px-3 !py-1.5 text-xs'
+                            aria-label={`Edit ${user.name}`}
                           >
-                            <FaEdit />
+                            <FaEdit aria-hidden='true' />
                           </Link>
                           <button
+                            type='button'
                             className='app-btn-danger !px-3 !py-1.5 text-xs'
                             onClick={() => deleteHandler(user._id)}
+                            aria-label={`Delete ${user.name}`}
                           >
-                            <FaTrash />
+                            <FaTrash aria-hidden='true' />
                           </button>
                         </div>
                       )}

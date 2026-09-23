@@ -64,6 +64,12 @@ test('catalog filtering and cart flow remain functional', async ({ page }) => {
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole('main').getByRole('link', { name: 'Atlas Backpack' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Open cart with 1 items/i })).toBeVisible();
+
+  await page.getByRole('button', { name: /Open cart with 1 items/i }).click();
+  await expect(page.getByRole('dialog', { name: 'Your Cart' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close cart' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Your Cart' })).toBeHidden();
 });
 
 test('mobile navigation exposes accessible state', async ({ page }) => {

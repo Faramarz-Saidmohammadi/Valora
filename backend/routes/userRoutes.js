@@ -15,6 +15,7 @@ import {
   authLimiter,
   registrationLimiter,
 } from '../middleware/rateLimitMiddleware.js';
+import checkObjectId from '../middleware/checkObjectId.js';
 
 const router = express.Router();
 
@@ -27,8 +28,8 @@ router
   .put(protect, updateUserProfile);
 router
   .route('/:id')
-  .delete(protect, admin, deleteUser)
-  .get(protect, admin, getUserById)
-  .put(protect, admin, updateUser);
+  .delete(protect, admin, checkObjectId, deleteUser)
+  .get(protect, admin, checkObjectId, getUserById)
+  .put(protect, admin, checkObjectId, updateUser);
 
 export default router;

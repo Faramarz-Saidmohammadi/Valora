@@ -1,5 +1,5 @@
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import Paginate from '../../components/Paginate';
@@ -22,8 +22,8 @@ const ProductListScreen = () => {
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure')) {
       try {
-        await deleteProduct(id);
-        refetch();
+        await deleteProduct(id).unwrap();
+        await refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -35,8 +35,8 @@ const ProductListScreen = () => {
   const createProductHandler = async () => {
     if (window.confirm('Are you sure you want to create a new product?')) {
       try {
-        await createProduct();
-        refetch();
+        await createProduct().unwrap();
+        await refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -50,8 +50,8 @@ const ProductListScreen = () => {
           <p className='app-subheading'>Admin</p>
           <h1 className='app-heading mt-2'>Products</h1>
         </div>
-        <button className='app-btn' onClick={createProductHandler}>
-          <FaPlus className='mr-2' /> Create Product
+        <button type='button' className='app-btn' onClick={createProductHandler}>
+          <FaPlus className='mr-2' aria-hidden='true' /> Create Product
         </button>
       </div>
 
@@ -75,14 +75,17 @@ const ProductListScreen = () => {
                   <Link
                     to={`/admin/product/${product._id}/edit`}
                     className='app-btn-secondary !px-3 !py-1.5 text-xs'
+                    aria-label={`Edit ${product.name}`}
                   >
-                    <FaEdit />
+                    <FaEdit aria-hidden='true' />
                   </Link>
                   <button
+                    type='button'
                     className='app-btn-danger !px-3 !py-1.5 text-xs'
                     onClick={() => deleteHandler(product._id)}
+                    aria-label={`Delete ${product.name}`}
                   >
-                    <FaTrash />
+                    <FaTrash aria-hidden='true' />
                   </button>
                 </div>
               </article>
@@ -113,14 +116,17 @@ const ProductListScreen = () => {
                         <Link
                           to={`/admin/product/${product._id}/edit`}
                           className='app-btn-secondary !px-3 !py-1.5 text-xs'
+                          aria-label={`Edit ${product.name}`}
                         >
-                          <FaEdit />
+                          <FaEdit aria-hidden='true' />
                         </Link>
                         <button
+                          type='button'
                           className='app-btn-danger !px-3 !py-1.5 text-xs'
                           onClick={() => deleteHandler(product._id)}
+                          aria-label={`Delete ${product.name}`}
                         >
-                          <FaTrash />
+                          <FaTrash aria-hidden='true' />
                         </button>
                       </div>
                     </td>

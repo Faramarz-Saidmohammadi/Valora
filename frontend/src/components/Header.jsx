@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FaBars, FaShoppingCart, FaTimes, FaUser } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { logout } from '../slices/authSlice';
 import SearchBox from './SearchBox';
@@ -20,6 +20,7 @@ const Header = () => {
   const [logoutApiCall] = useLogoutMutation();
 
   const closeMenu = () => setMenuOpen(false);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const logoutHandler = async () => {
     try {
@@ -143,7 +144,7 @@ const Header = () => {
 
       <CartDrawer
         open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        onClose={closeDrawer}
         cartItems={cartItems}
       />
     </header>

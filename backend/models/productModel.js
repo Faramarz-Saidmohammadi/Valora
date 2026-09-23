@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 const reviewSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
-    rating: { type: Number, required: true },
-    comment: { type: String, required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, required: true, trim: true, maxlength: 1000 },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -58,11 +58,17 @@ const productSchema = mongoose.Schema(
       type: Number,
       required: true,
       default: 0,
+      min: 0,
     },
     countInStock: {
       type: Number,
       required: true,
       default: 0,
+      min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: 'Stock count must be a whole number',
+      },
     },
   },
   {

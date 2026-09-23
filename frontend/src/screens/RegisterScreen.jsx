@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../components/Loader';
 import FormContainer from '../components/FormContainer';
@@ -7,6 +7,7 @@ import FormContainer from '../components/FormContainer';
 import { useRegisterMutation } from '../slices/usersApiSlice';
 import { setCredentials } from '../slices/authSlice';
 import { toast } from 'react-toastify';
+import { getSafeRedirect } from '../utils/safeRedirect.mjs';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
@@ -23,7 +24,7 @@ const RegisterScreen = () => {
 
   const { search } = useLocation();
   const sp = new URLSearchParams(search);
-  const redirect = sp.get('redirect') || '/';
+  const redirect = getSafeRedirect(sp.get('redirect'));
 
   useEffect(() => {
     if (userInfo) {
@@ -62,6 +63,10 @@ const RegisterScreen = () => {
               type='text'
               placeholder='Enter name'
               value={name}
+              required
+              minLength={2}
+              maxLength={80}
+              autoComplete='name'
               onChange={(e) => setName(e.target.value)}
               className='app-input'
             />
@@ -75,6 +80,8 @@ const RegisterScreen = () => {
               type='email'
               placeholder='Enter email'
               value={email}
+              required
+              autoComplete='email'
               onChange={(e) => setEmail(e.target.value)}
               className='app-input'
             />
@@ -88,6 +95,10 @@ const RegisterScreen = () => {
               type='password'
               placeholder='Enter password'
               value={password}
+              required
+              minLength={8}
+              maxLength={128}
+              autoComplete='new-password'
               onChange={(e) => setPassword(e.target.value)}
               className='app-input'
             />
@@ -104,6 +115,10 @@ const RegisterScreen = () => {
               type='password'
               placeholder='Confirm password'
               value={confirmPassword}
+              required
+              minLength={8}
+              maxLength={128}
+              autoComplete='new-password'
               onChange={(e) => setConfirmPassword(e.target.value)}
               className='app-input'
             />
@@ -115,7 +130,7 @@ const RegisterScreen = () => {
         </form>
         <p className='mt-5 text-sm text-slate-600'>
           Already have an account?{' '}
-          <Link to={redirect ? `/login?redirect=${redirect}` : '/login'}>Login</Link>
+          <Link to={`/login?redirect=${encodeURIComponent(redirect)}`}>Login</Link>
         </p>
       </div>
     </FormContainer>
