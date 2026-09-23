@@ -56,7 +56,7 @@ test('catalog filtering and cart flow remain functional', async ({ page }) => {
   await expect(page.getByText('Atlas Backpack')).toBeVisible();
   await expect(page.getByText('Studio Headphones')).toBeHidden();
 
-  await page.getByRole('link', { name: 'View Product' }).click();
+  await page.getByRole('link', { name: 'View Atlas Backpack' }).click();
   await expect(page.getByRole('heading', { name: 'Atlas Backpack' })).toBeVisible();
   await expect(page.getByText('7 in stock')).toBeVisible();
 
