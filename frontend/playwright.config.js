@@ -17,7 +17,12 @@ export default defineConfig({
     },
     {
       name: 'mobile-chromium',
-      use: { ...devices['Pixel 5'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 393, height: 727 },
+        screen: { width: 393, height: 851 },
+        hasTouch: true,
+      },
     },
   ],
   webServer: {

@@ -44,7 +44,7 @@ async function mockCatalog(page) {
   });
 }
 
-test('catalog filtering and cart flow remain functional', async ({ page }, testInfo) => {
+test('catalog filtering and cart flow remain functional', async ({ page }) => {
   await mockCatalog(page);
   await page.goto('/search/test');
 
@@ -61,21 +61,6 @@ test('catalog filtering and cart flow remain functional', async ({ page }, testI
   await expect(page.getByText('7 in stock')).toBeVisible();
 
   const addToCartButton = page.getByRole('button', { name: 'Add to cart' });
-  if (testInfo.project.name === 'mobile-chromium') {
-    const layout = await addToCartButton.evaluate((button) => {
-      const buttonRect = button.getBoundingClientRect();
-      const pointX = buttonRect.left + buttonRect.width / 2;
-      const pointY = buttonRect.top + buttonRect.height / 2;
-      const topElement = document.elementFromPoint(pointX, pointY);
-
-      return {
-        buttonRect: buttonRect.toJSON(),
-        topElement: topElement?.outerHTML.slice(0, 300),
-        viewport: { width: window.innerWidth, height: window.innerHeight },
-      };
-    });
-    console.log(`Mobile purchase layout: ${JSON.stringify(layout)}`);
-  }
   await addToCartButton.click();
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole('main').getByRole('link', { name: 'Atlas Backpack' })).toBeVisible();
