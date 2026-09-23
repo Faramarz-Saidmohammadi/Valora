@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
@@ -38,7 +38,7 @@ const PlaceOrderScreen = () => {
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (err) {
-      toast.error(err);
+      toast.error(err?.data?.message || err.error || 'Unable to place order');
     }
   };
 
@@ -75,7 +75,7 @@ const PlaceOrderScreen = () => {
                       {item.name}
                     </Link>
                     <p className='col-span-2 text-right text-xs font-semibold text-ink sm:col-span-1 sm:text-sm'>
-                      {item.qty} x ${item.price} = ${(item.qty * (item.price * 100)) / 100}
+                      {item.qty} x ${item.price} = ${(item.qty * item.price).toFixed(2)}
                     </p>
                   </div>
                 ))}
@@ -105,11 +105,15 @@ const PlaceOrderScreen = () => {
                 <span className='font-bold text-ink'>${cart.totalPrice}</span>
               </p>
             </div>
-            {error && <Message variant='danger'>{error.data.message}</Message>}
+            {error && (
+              <Message variant='danger'>
+                {error?.data?.message || error.error || 'Unable to place order'}
+              </Message>
+            )}
             <button
               type='button'
               className='app-btn w-full'
-              disabled={cart.cartItems === 0}
+              disabled={cart.cartItems.length === 0 || isLoading}
               onClick={placeOrderHandler}
             >
               Place Order Securely

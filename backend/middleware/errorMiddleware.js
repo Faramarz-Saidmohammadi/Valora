@@ -8,8 +8,15 @@ const errorHandler = (err, req, res, next) => {
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message;
 
-  // NOTE: checking for invalid ObjectId moved to it's own middleware
-  // See README for further info.
+  if (err.name === 'ValidationError') {
+    statusCode = 400;
+    message = Object.values(err.errors).map((error) => error.message).join(', ');
+  }
+
+  if (err.code === 11000) {
+    statusCode = 400;
+    message = 'An account with that email already exists';
+  }
 
   res.status(statusCode).json({
     message: message,

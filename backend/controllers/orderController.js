@@ -1,7 +1,9 @@
 import asyncHandler from '../middleware/asyncHandler.js';
+import { isValidObjectId } from 'mongoose';
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
 import { calcPrices } from '../utils/calcPrices.js';
+import { buildOrderItems, getOrderProductIds } from '../utils/orderItems.js';
 import { canAccessOrder } from '../utils/orderAccess.js';
 import { verifyPayPalPayment, checkIfNewTransaction } from '../utils/paypal.js';
 
@@ -16,34 +18,54 @@ const addOrderItems = asyncHandler(async (req, res) => {
     throw new Error('No order items');
   }
 
-  const itemsFromDB = await Product.find({
-    _id: { $in: orderItems.map((item) => item._id) },
-  });
-
-  if (itemsFromDB.length !== orderItems.length) {
+  let productIds;
+  try {
+    productIds = getOrderProductIds(orderItems);
+  } catch (error) {
     res.status(400);
-    throw new Error('One or more products are unavailable');
+    throw error;
   }
 
-  const dbOrderItems = orderItems.map((itemFromClient) => {
-    const matchingItemFromDB = itemsFromDB.find(
-      (itemFromDB) => itemFromDB._id.toString() === itemFromClient._id
-    );
+  if (!productIds.every(isValidObjectId)) {
+    res.status(400);
+    throw new Error('Invalid product reference');
+  }
 
-    return {
-      ...itemFromClient,
-      product: itemFromClient._id,
-      price: matchingItemFromDB.price,
-      _id: undefined,
-    };
+  const addressFields = ['address', 'city', 'postalCode', 'country'];
+  const hasValidShippingAddress = addressFields.every(
+    (field) => typeof shippingAddress?.[field] === 'string' && shippingAddress[field].trim()
+  );
+
+  if (!hasValidShippingAddress) {
+    res.status(400);
+    throw new Error('Complete shipping address is required');
+  }
+
+  if (paymentMethod !== 'PayPal') {
+    res.status(400);
+    throw new Error('Unsupported payment method');
+  }
+
+  const itemsFromDB = await Product.find({
+    _id: { $in: productIds },
   });
+
+  let dbOrderItems;
+  try {
+    dbOrderItems = buildOrderItems(orderItems, itemsFromDB);
+  } catch (error) {
+    res.status(400);
+    throw error;
+  }
 
   const { itemsPrice, taxPrice, shippingPrice, totalPrice } = calcPrices(dbOrderItems);
 
   const order = new Order({
     orderItems: dbOrderItems,
     user: req.user._id,
-    shippingAddress,
+    shippingAddress: Object.fromEntries(
+      addressFields.map((field) => [field, shippingAddress[field].trim()])
+    ),
     paymentMethod,
     itemsPrice,
     taxPrice,
@@ -103,13 +125,19 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     throw new Error('Order is already paid');
   }
 
-  const { verified, value } = await verifyPayPalPayment(req.body.id);
+  if (typeof req.body.id !== 'string' || !req.body.id.trim()) {
+    res.status(400);
+    throw new Error('Payment transaction ID is required');
+  }
+
+  const transactionId = req.body.id.trim();
+  const { verified, value } = await verifyPayPalPayment(transactionId);
   if (!verified) {
     res.status(400);
     throw new Error('Payment not verified');
   }
 
-  const isNewTransaction = await checkIfNewTransaction(Order, req.body.id);
+  const isNewTransaction = await checkIfNewTransaction(Order, transactionId);
   if (!isNewTransaction) {
     res.status(400);
     throw new Error('Transaction has been used before');
@@ -124,7 +152,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
   order.isPaid = true;
   order.paidAt = Date.now();
   order.paymentResult = {
-    id: req.body.id,
+    id: transactionId,
     status: req.body.status,
     update_time: req.body.update_time,
     email_address: req.body.payer?.email_address,

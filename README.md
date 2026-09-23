@@ -53,6 +53,8 @@ PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/valora
 JWT_SECRET=replace-with-a-long-random-secret
 PAYPAL_CLIENT_ID=
+PAYPAL_APP_SECRET=
+PAYPAL_API_URL=https://api-m.sandbox.paypal.com
 PAGINATION_LIMIT=8
 ```
 
@@ -62,7 +64,7 @@ Never commit real credentials or production secrets.
 
 ```bash
 npm run dev          # backend + frontend development
-npm test             # backend authorization regression tests
+npm test             # backend validation and authorization regression tests
 npm run build        # production frontend build
 npm run data:import  # seed catalog data
 npm run data:destroy # remove seeded data
@@ -83,12 +85,12 @@ Pull requests run automated checks for:
 
 - clean backend dependency installation
 - backend JavaScript syntax validation
-- authorization regression tests
+- validation and authorization regression tests
 - backend production dependency audit
 - clean frontend dependency installation
 - Vite production build
 - frontend production dependency audit
-- Chromium browser regression tests for catalog filtering, product navigation, cart behavior, and responsive navigation
+- desktop and mobile Chromium regression tests for catalog filtering, product navigation, cart behavior, and responsive navigation
 
 ## Package management
 

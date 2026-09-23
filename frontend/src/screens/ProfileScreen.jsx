@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaTimes } from 'react-icons/fa';
-
 import { toast } from 'react-toastify';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import { useProfileMutation } from '../slices/usersApiSlice';
 import { useGetMyOrdersQuery } from '../slices/ordersApiSlice';
 import { setCredentials } from '../slices/authSlice';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const ProfileScreen = () => {
   const [name, setName] = useState('');
@@ -63,6 +61,10 @@ const ProfileScreen = () => {
                 type='text'
                 placeholder='Enter name'
                 value={name}
+                required
+                minLength={2}
+                maxLength={80}
+                autoComplete='name'
                 onChange={(e) => setName(e.target.value)}
                 className='app-input'
               />
@@ -76,6 +78,8 @@ const ProfileScreen = () => {
                 type='email'
                 placeholder='Enter email'
                 value={email}
+                required
+                autoComplete='email'
                 onChange={(e) => setEmail(e.target.value)}
                 className='app-input'
               />
@@ -89,6 +93,9 @@ const ProfileScreen = () => {
                 type='password'
                 placeholder='Enter password'
                 value={password}
+                minLength={8}
+                maxLength={128}
+                autoComplete='new-password'
                 onChange={(e) => setPassword(e.target.value)}
                 className='app-input'
               />
@@ -105,6 +112,9 @@ const ProfileScreen = () => {
                 type='password'
                 placeholder='Confirm password'
                 value={confirmPassword}
+                minLength={8}
+                maxLength={128}
+                autoComplete='new-password'
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className='app-input'
               />
@@ -158,13 +168,13 @@ const ProfileScreen = () => {
                       <td>{order.createdAt.substring(0, 10)}</td>
                       <td>{order.totalPrice}</td>
                       <td>
-                        {order.isPaid ? order.paidAt.substring(0, 10) : <FaTimes className='text-red-500' />}
+                        {order.isPaid ? order.paidAt.substring(0, 10) : 'No'}
                       </td>
                       <td>
                         {order.isDelivered ? (
                           order.deliveredAt.substring(0, 10)
                         ) : (
-                          <FaTimes className='text-red-500' />
+                          'No'
                         )}
                       </td>
                       <td>

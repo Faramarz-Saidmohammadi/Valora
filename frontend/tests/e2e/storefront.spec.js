@@ -56,14 +56,27 @@ test('catalog filtering and cart flow remain functional', async ({ page }) => {
   await expect(page.getByText('Atlas Backpack')).toBeVisible();
   await expect(page.getByText('Studio Headphones')).toBeHidden();
 
-  await page.getByRole('link', { name: 'View Product' }).click();
+  await page.getByRole('link', { name: 'View Atlas Backpack' }).click();
   await expect(page.getByRole('heading', { name: 'Atlas Backpack' })).toBeVisible();
   await expect(page.getByText('7 in stock')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add to cart' }).click();
+  const addToCartButton = page.getByRole('button', { name: 'Add to cart' });
+  await addToCartButton.click();
   await expect(page).toHaveURL(/\/cart$/);
   await expect(page.getByRole('main').getByRole('link', { name: 'Atlas Backpack' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Open cart with 1 items/i })).toBeVisible();
+
+  const menuButton = page.getByRole('button', { name: 'Open navigation menu' });
+  if (await menuButton.isVisible()) {
+    await menuButton.click();
+  }
+
+  const cartButton = page.getByRole('button', { name: /Open cart with 1 items/i });
+  await expect(cartButton).toBeVisible();
+  await cartButton.click();
+  await expect(page.getByRole('dialog', { name: 'Your Cart' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close cart' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Your Cart' })).toBeHidden();
 });
 
 test('mobile navigation exposes accessible state', async ({ page }) => {

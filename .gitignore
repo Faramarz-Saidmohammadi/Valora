@@ -10,6 +10,8 @@ frontend/node_modules/
 # Build and test output
 coverage/
 frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
 
 # Runtime uploads
 uploads/*

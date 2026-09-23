@@ -1,12 +1,14 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import generateToken from '../utils/generateToken.js';
 import User from '../models/userModel.js';
+import { normalizeEmail, validateAccountInput } from '../utils/userInput.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/auth
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = normalizeEmail(req.body.email);
 
   const user = await User.findOne({ email });
 
@@ -29,7 +31,15 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  const email = normalizeEmail(req.body.email);
+  const { password } = req.body;
+
+  const validationError = validateAccountInput({ name, email, password });
+  if (validationError) {
+    res.status(400);
+    throw new Error(validationError);
+  }
 
   const userExists = await User.findOne({ email });
 
@@ -63,7 +73,11 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/logout
 // @access  Public
 const logoutUser = (req, res) => {
-  res.clearCookie('jwt');
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== 'development',
+    sameSite: 'strict',
+  });
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
@@ -93,11 +107,26 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : user.name;
+    const email = req.body.email === undefined
+      ? user.email
+      : normalizeEmail(req.body.email);
+    const password = req.body.password || '';
 
-    if (req.body.password) {
-      user.password = req.body.password;
+    const validationError = validateAccountInput(
+      { name, email, password },
+      { requirePassword: false }
+    );
+    if (validationError) {
+      res.status(400);
+      throw new Error(validationError);
+    }
+
+    user.name = name;
+    user.email = email;
+
+    if (password) {
+      user.password = password;
     }
 
     const updatedUser = await user.save();
@@ -118,7 +147,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 // @route   GET /api/users
 // @access  Private/Admin
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({});
+  const users = await User.find({}).select('-password');
   res.json(users);
 });
 
@@ -161,9 +190,22 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.isAdmin = Boolean(req.body.isAdmin);
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : user.name;
+    const email = req.body.email === undefined
+      ? user.email
+      : normalizeEmail(req.body.email);
+    const validationError = validateAccountInput(
+      { name, email, password: '' },
+      { requirePassword: false }
+    );
+    if (validationError) {
+      res.status(400);
+      throw new Error(validationError);
+    }
+
+    user.name = name;
+    user.email = email;
+    user.isAdmin = req.body.isAdmin === true;
 
     const updatedUser = await user.save();
 

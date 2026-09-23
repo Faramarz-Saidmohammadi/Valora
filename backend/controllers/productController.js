@@ -5,13 +5,17 @@ import Product from '../models/productModel.js';
 // @route   GET /api/products
 // @access  Public
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = process.env.PAGINATION_LIMIT;
-  const page = Number(req.query.pageNumber) || 1;
+  const pageSize = Math.max(1, Number.parseInt(process.env.PAGINATION_LIMIT, 10) || 8);
+  const page = Math.max(1, Number.parseInt(req.query.pageNumber, 10) || 1);
+  const searchTerm = typeof req.query.keyword === 'string'
+    ? req.query.keyword.trim().slice(0, 100)
+    : '';
+  const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  const keyword = req.query.keyword
+  const keyword = escapedSearchTerm
     ? {
         name: {
-          $regex: req.query.keyword,
+          $regex: escapedSearchTerm,
           $options: 'i',
         },
       }
@@ -109,6 +113,18 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // @access  Private
 const createProductReview = asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
+  const numericRating = Number(rating);
+  const normalizedComment = typeof comment === 'string' ? comment.trim() : '';
+
+  if (!Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+    res.status(400);
+    throw new Error('Rating must be a whole number between 1 and 5');
+  }
+
+  if (!normalizedComment || normalizedComment.length > 1000) {
+    res.status(400);
+    throw new Error('Review comment must be between 1 and 1000 characters');
+  }
 
   const product = await Product.findById(req.params.id);
 
@@ -124,8 +140,8 @@ const createProductReview = asyncHandler(async (req, res) => {
 
     const review = {
       name: req.user.name,
-      rating: Number(rating),
-      comment,
+      rating: numericRating,
+      comment: normalizedComment,
       user: req.user._id,
     };
 
