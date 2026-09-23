@@ -63,12 +63,12 @@ const ProductScreen = () => {
       ) : (
         <>
           <Meta title={product.name} description={product.description} />
-          <section className='grid gap-6 lg:grid-cols-12'>
+          <section className='space-y-6 lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0'>
             <div className='app-card overflow-hidden p-0 lg:col-span-6'>
               <img
                 src={product.image}
                 alt={product.name}
-                className='h-full max-h-[34rem] min-h-[24rem] w-full object-cover'
+                className='h-80 w-full object-cover sm:h-96 lg:h-full lg:max-h-[34rem] lg:min-h-[24rem]'
               />
             </div>
 
